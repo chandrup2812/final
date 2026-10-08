@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "Scan": {
+      "title": "Scan",
+      "description": "Colorimetric strip exposure scan record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "workerId": { "type": "string", "maxLength": 64 },
+        "workerName": { "type": "string", "maxLength": 128 },
+        "deviceId": { "type": "string", "maxLength": 64 },
+        "exposurePpmHr": { "type": "number" },
+        "status": { "type": "string", "enum": ["ESTIMATED", "SIMULATED", "VALIDATED"] },
+        "stripType": { "type": "string", "enum": ["FAST", "SLOW"] },
+        "deltaE": { "type": "number" },
+        "temperatureC": { "type": "number" },
+        "humidityPct": { "type": "number" },
+        "safetyLevel": { "type": "string", "enum": ["SAFE", "CAUTION", "WARNING", "DANGER"] },
+        "timestamp": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["workerId", "exposurePpmHr", "status", "stripType", "deltaE", "timestamp", "safetyLevel"]
+    },
+    "Worker": {
+      "title": "Worker",
+      "description": "Industrial worker safety profile and cumulative dosimeter exposure",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["worker", "supervisor", "safety_officer"] },
+        "shift": { "type": "string", "maxLength": 64 },
+        "assignedDeviceId": { "type": "string", "maxLength": 64 },
+        "currentExposurePpmHr": { "type": "number" },
+        "safetyLevel": { "type": "string", "enum": ["SAFE", "CAUTION", "WARNING", "DANGER"] },
+        "lastScanTimestamp": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["name", "role", "currentExposurePpmHr", "safetyLevel"]
+    },
+    "Device": {
+      "title": "Device",
+      "description": "ESP32 wearable node telemetry and actuation states",
+      "type": "object",
+      "properties": {
+        "deviceId": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 128 },
+        "online": { "type": "boolean" },
+        "lastSeen": { "type": "string", "maxLength": 64 },
+        "firmwareVersion": { "type": "string", "maxLength": 32 }
+      },
+      "required": ["deviceId", "name", "online"]
+    },
+    "Alert": {
+      "title": "Alert",
+      "description": "Safety threshold breach log entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "workerId": { "type": "string", "maxLength": 64 },
+        "workerName": { "type": "string", "maxLength": 128 },
+        "exposurePpmHr": { "type": "number" },
+        "level": { "type": "string", "enum": ["SAFE", "CAUTION", "WARNING", "DANGER"] },
+        "esp32TriggerConfirmed": { "type": "boolean" },
+        "timestamp": { "type": "string", "maxLength": 64 },
+        "resolved": { "type": "boolean" }
+      },
+      "required": ["workerId", "exposurePpmHr", "level", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/scans/{scanId}": {
+      "schema": "Scan",
+      "description": "All colorimetric exposure scan results"
+    },
+    "/workers/{workerId}": {
+      "schema": "Worker",
+      "description": "Worker personnel profile and dosimeter status"
+    },
+    "/devices/{deviceId}": {
+      "schema": "Device",
+      "description": "ESP32 wearable dosimeter nodes"
+    },
+    "/alerts/{alertId}": {
+      "schema": "Alert",
+      "description": "Threshold breach logs and actuator audit records"
+    }
+  }
+}

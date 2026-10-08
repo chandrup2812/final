@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny catch-all safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 64 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation for Scans
+    function isValidScan(data) {
+      return data.keys().hasAll(['workerId', 'exposurePpmHr', 'status', 'stripType', 'deltaE', 'timestamp', 'safetyLevel']) &&
+             data.workerId is string && data.workerId.size() <= 64 &&
+             data.exposurePpmHr is number && data.exposurePpmHr >= 0 &&
+             data.status in ['ESTIMATED', 'SIMULATED', 'VALIDATED'] &&
+             data.stripType in ['FAST', 'SLOW'] &&
+             data.deltaE is number &&
+             data.safetyLevel in ['SAFE', 'CAUTION', 'WARNING', 'DANGER'] &&
+             data.timestamp is string && data.timestamp.size() <= 64;
+    }
+
+    match /scans/{scanId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(scanId) && isValidScan(incoming());
+      allow update, delete: if false; // Scans are immutable safety records
+    }
+
+    // Validation for Workers
+    function isValidWorker(data) {
+      return data.keys().hasAll(['name', 'role', 'currentExposurePpmHr', 'safetyLevel']) &&
+             data.name is string && data.name.size() <= 128 &&
+             data.role in ['worker', 'supervisor', 'safety_officer'] &&
+             data.currentExposurePpmHr is number &&
+             data.safetyLevel in ['SAFE', 'CAUTION', 'WARNING', 'DANGER'];
+    }
+
+    match /workers/{workerId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(workerId) && isValidWorker(incoming());
+      allow delete: if false;
+    }
+
+    // Validation for Devices
+    match /devices/{deviceId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(deviceId) &&
+                            incoming().deviceId is string && incoming().online is bool;
+      allow delete: if false;
+    }
+
+    // Validation for Alerts
+    function isValidAlert(data) {
+      return data.keys().hasAll(['workerId', 'exposurePpmHr', 'level', 'timestamp']) &&
+             data.workerId is string &&
+             data.exposurePpmHr is number &&
+             data.level in ['SAFE', 'CAUTION', 'WARNING', 'DANGER'] &&
+             data.timestamp is string;
+    }
+
+    match /alerts/{alertId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(alertId) && isValidAlert(incoming());
+      allow update: if isSignedIn() && isValidId(alertId) &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['resolved']);
+      allow delete: if false;
+    }
+  }
+}

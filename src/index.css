@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-orbitron: 'Orbitron', -apple-system, sans-serif;
+    --font-rajdhani: 'Rajdhani', -apple-system, sans-serif;
+    --font-inter: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-inter);
+    background-color: #0a0e1a;
+    color: #e2e8f0;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-heading {
+    font-family: var(--font-rajdhani);
+    letter-spacing: 0.02em;
+  }
+
+  .font-brand {
+    font-family: var(--font-orbitron);
+    letter-spacing: 0.06em;
+  }
+
+  .font-tech {
+    font-family: var(--font-mono);
+  }
+}
+
+/* Industrial dark glassmorphism & accent glows */
+.glass-panel {
+  background: rgba(14, 21, 37, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-orange {
+  background: rgba(26, 17, 12, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 107, 26, 0.35);
+  box-shadow: 0 0 25px rgba(255, 107, 26, 0.15);
+}
+
+.glass-panel-danger {
+  background: rgba(30, 10, 14, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+}
+
+.glass-panel-cyan {
+  background: rgba(8, 26, 36, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.12);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0e1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
